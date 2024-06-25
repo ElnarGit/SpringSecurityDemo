@@ -1,7 +1,9 @@
 package net.elnar.springsecuritydemo.config;
 
+import net.elnar.springsecuritydemo.model.Role;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.userdetails.User;
@@ -22,9 +24,18 @@ public class SecurityConfig {
 		http
 				.csrf().disable()
 				.authorizeHttpRequests(authorizeRequests ->
-						authorizeRequests.anyRequest().authenticated()
+						authorizeRequests
+								.requestMatchers("/").permitAll()
+								.requestMatchers(HttpMethod.GET, "/api/**")
+								.hasAnyRole(Role.ADMIN.name(), Role.USER.name())
+								.requestMatchers(HttpMethod.POST, "/api/**")
+								.hasRole(Role.ADMIN.name())
+								.requestMatchers(HttpMethod.DELETE, "/api/**")
+								.hasRole(Role.ADMIN.name())
+								.anyRequest()
+								.authenticated()
 				)
-				.formLogin(withDefaults());
+				.httpBasic(withDefaults());
 		
 		return http.build();
 	}
@@ -35,7 +46,13 @@ public class SecurityConfig {
 				User.builder()
 						.username("admin")
 						.password(passwordEncoder().encode("admin"))
-						.roles("ADMIN")
+						.roles(Role.ADMIN.name())
+						.build(),
+				
+				User.builder()
+						.username("user")
+						.password(passwordEncoder().encode("user"))
+						.roles(Role.USER.name())
 						.build()
 		);
 	}
