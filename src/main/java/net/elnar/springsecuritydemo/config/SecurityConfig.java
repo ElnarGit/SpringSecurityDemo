@@ -1,5 +1,6 @@
 package net.elnar.springsecuritydemo.config;
 
+import net.elnar.springsecuritydemo.model.Permission;
 import net.elnar.springsecuritydemo.model.Role;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -27,11 +28,11 @@ public class SecurityConfig {
 						authorizeRequests
 								.requestMatchers("/").permitAll()
 								.requestMatchers(HttpMethod.GET, "/api/**")
-								.hasAnyRole(Role.ADMIN.name(), Role.USER.name())
+								.hasAuthority(Permission.DEVELOPERS_READ.getPermission())
 								.requestMatchers(HttpMethod.POST, "/api/**")
-								.hasRole(Role.ADMIN.name())
+								.hasAuthority(Permission.DEVELOPERS_WRITE.getPermission())
 								.requestMatchers(HttpMethod.DELETE, "/api/**")
-								.hasRole(Role.ADMIN.name())
+								.hasAuthority(Permission.DEVELOPERS_WRITE.getPermission())
 								.anyRequest()
 								.authenticated()
 				)
@@ -46,13 +47,13 @@ public class SecurityConfig {
 				User.builder()
 						.username("admin")
 						.password(passwordEncoder().encode("admin"))
-						.roles(Role.ADMIN.name())
+						.authorities(Role.ADMIN.getAuthorities())
 						.build(),
 				
 				User.builder()
 						.username("user")
 						.password(passwordEncoder().encode("user"))
-						.roles(Role.USER.name())
+						.authorities(Role.USER.getAuthorities())
 						.build()
 		);
 	}
