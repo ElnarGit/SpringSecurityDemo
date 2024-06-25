@@ -1,10 +1,9 @@
 package net.elnar.springsecuritydemo.config;
 
-import net.elnar.springsecuritydemo.model.Permission;
 import net.elnar.springsecuritydemo.model.Role;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.userdetails.User;
@@ -18,6 +17,7 @@ import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
 	
 	@Bean
@@ -27,12 +27,6 @@ public class SecurityConfig {
 				.authorizeHttpRequests(authorizeRequests ->
 						authorizeRequests
 								.requestMatchers("/").permitAll()
-								.requestMatchers(HttpMethod.GET, "/api/**")
-								.hasAuthority(Permission.DEVELOPERS_READ.getPermission())
-								.requestMatchers(HttpMethod.POST, "/api/**")
-								.hasAuthority(Permission.DEVELOPERS_WRITE.getPermission())
-								.requestMatchers(HttpMethod.DELETE, "/api/**")
-								.hasAuthority(Permission.DEVELOPERS_WRITE.getPermission())
 								.anyRequest()
 								.authenticated()
 				)
