@@ -12,25 +12,33 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
-
-import static org.springframework.security.config.Customizer.withDefaults;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity(prePostEnabled = true)
+@EnableMethodSecurity()
 public class SecurityConfig {
 	
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		http
 				.csrf().disable()
-				.authorizeHttpRequests(authorizeRequests ->
-						authorizeRequests
+				.authorizeHttpRequests(authorizeRequests -> authorizeRequests
 								.requestMatchers("/").permitAll()
-								.anyRequest()
-								.authenticated()
+								.anyRequest().authenticated()
 				)
-				.httpBasic(withDefaults());
+				.formLogin(formLogin -> formLogin
+						.loginPage("/auth/login").permitAll()
+						.defaultSuccessUrl("/auth/success", true)
+				)
+				.logout(logout -> logout
+						.logoutRequestMatcher(new AntPathRequestMatcher("/auth/logout", "POST"))
+						.invalidateHttpSession(true)
+						.clearAuthentication(true)
+						.deleteCookies("JSESSIONID")
+						.logoutSuccessUrl("/auth/login")
+				);
+				
 		
 		return http.build();
 	}
